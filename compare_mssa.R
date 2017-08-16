@@ -7,25 +7,38 @@ compare_mssa=function(file){
   d=gsub('\\s{2,}',' ',d)
   d = d[d != '']
   
+  is.mssa=length(grep('Master Supplier',d))>0
+  is.mmva=F
+  
   lang=detect_language(paste(d[101:110],collapse=' '))
   cat(lang,' ',length(grep('Master Supplier',d))>0,'\n')
-  if(lang=='English' & (length(grep('Master Supplier',d))>0)) {  #MSSA only, not MMVA
-    
-    
-    end = grep('remainder of', tolower(d))
-    if(length(end)==0)
-      end = grep('remainderof', tolower(d))
-    if(length(end)>0)
-      d = d[1:(end - 1)]
-    
-    
+  if(!is.mssa)
+    is.mmva=length(grep('Master Microsoft Vendor',d))>0
+  fileinfo=c(file,lang,)
+  
+  #MSSA only, not MMVA
+  if(lang!='English' ! is.mssa){
+    return()
+  }
+  
+  
+  end = grep('remainder of', tolower(d))
+  if(length(end)==0)
+    end = grep('remainderof', tolower(d))
+  if(length(end)>0)
+    d = d[1:(end - 1)]
+  
+  
   nlines = length(d)
   
   #### SECTIONS ####
   temp_pos_section = grep('^section', tolower(d))
   if(length(temp_pos_section)==0)
     temp_pos_section = grep('^\\d{1,2}\\. ', tolower(d))
-  if(length(temp_pos_section)==0) return()
+  if(length(temp_pos_section)==0) {
+    return()
+  } 
+  
   pos_section = c(1, temp_pos_section, length(d) + 1)
   sections = c(NA, 1:(length(pos_section) - 1))
   section = NULL
@@ -113,5 +126,5 @@ compare_mssa=function(file){
   #### get match distances ####
   dist=stringdistmatrix(template$text,c1$text,method = 'jw')
   list(c1,dist)
-  }
+}
 }
